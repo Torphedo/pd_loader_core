@@ -51,6 +51,19 @@ void* plugin_get_proc_address(const char* filename, const char* function_name) {
     return MemoryGetProcAddress(handle, function_name);
 }
 
+void plugin_cleanup(void* plugin_handle) {
+    if (plugin_handle != NULL) {
+        // Remove the old handle from the list.
+        for (uint32_t i = 0; i < module_count; i++) {
+            if (loaded_modules[i].handle == plugin_handle) {
+                loaded_modules[i].handle = NULL;
+            }
+        }
+
+        MemoryFreeLibrary(plugin_handle);
+    }
+}
+
 void load_plugins() {
     static const char* dir = "/plugins/";
     char** file_list = PHYSFS_enumerateFiles(dir);
