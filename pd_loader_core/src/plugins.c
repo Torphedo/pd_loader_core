@@ -28,23 +28,6 @@ typedef struct {
 static module* loaded_modules = NULL;
 uint32_t plugin_count = 0;
 
-// This casting is really annoying, but it will just throw errors about the slightly different types if I don't.
-const plugin_api api = {
-        .PHYSFS_exists         = (bool (*)(const char*)) PHYSFS_exists,
-        .PHYSFS_openRead       = (void*(*)(const char*)) PHYSFS_openRead,
-        .PHYSFS_openWrite      = (void*(*)(const char*)) PHYSFS_openWrite,
-        .PHYSFS_openAppend     = (void*(*)(const char*)) PHYSFS_openAppend,
-        .PHYSFS_readBytes      = (int64_t (*)(void*, void*, uint64_t)) PHYSFS_readBytes,
-        .PHYSFS_writeBytes     = (int64_t (*)(void*, const void*, uint64_t)) PHYSFS_writeBytes,
-        .PHYSFS_fileLength     = (int64_t (*)(void*)) PHYSFS_fileLength,
-        .PHYSFS_tell           = (int64_t (*)(void*)) PHYSFS_tell,
-        .PHYSFS_seek           = (int32_t (*)(void*, uint64_t)) PHYSFS_seek,
-        .PHYSFS_close          = (int (*)(void*)) PHYSFS_close,
-        .PHYSFS_enumerateFiles = PHYSFS_enumerateFiles,
-        .PHYSFS_freeList       = PHYSFS_freeList,
-        .plugin_get_proc_address = (void *(*)(void *, const char *)) MemoryGetProcAddress
-};
-
 HMEMORYMODULE custom_load_library(LPCSTR name, void* unused) {
     // MAX_PATH should be plenty unless someone makes an absolutely ridiculous filename.
     char path[MAX_PATH] = {0};
