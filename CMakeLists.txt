@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.16)
+project(pd_loader_core
+	VERSION 1.0.0
+	LANGUAGES C
+)
+
+set(CMAKE_C_STANDARD 99) # Our code is C99
+set(CMAKE_SHARED_LIBRARY_PREFIX "") # Remove "lib" prefix from the output filename
+if (MSVC)
+	# Statically link C runtime. Comment this out to get a tiny DLL.
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
+# Compile external libraries first, using the CMakeLists.txt in each folder
+add_subdirectory(ext/minhook)
+add_subdirectory(ext/MemoryModule)
+add_subdirectory(ext/physfs)
+
+# Compile our DLL using the CMakeLists.txt in the "pd_loader_core" folder
+add_subdirectory(pd_loader_core)

@@ -1,0 +1,9 @@
+[submodule "ext/physfs"]
+	path = ext/physfs
+	url = https://github.com/icculus/physfs
+[submodule "ext/minhook"]
+	path = ext/minhook
+	url = https://github.com/TsudaKageyu/minhook
+[submodule "ext/MemoryModule"]
+	path = ext/MemoryModule
+	url = https://github.com/fancycode/MemoryModule
