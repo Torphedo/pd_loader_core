@@ -28,6 +28,29 @@ typedef struct {
 static module* loaded_modules = NULL;
 uint32_t module_count = 0;
 
+void* plugin_get_module_handle(const char* filename) {
+    for (uint32_t i = 0; i < module_count + 10; i++) {
+        if (loaded_modules[i].handle != NULL) {
+            if (strcmp(filename, loaded_modules[i].filename) == 0) {
+                // Filename match!
+                return loaded_modules[i].handle;
+            }
+        }
+    }
+
+    // No valid handles match this filename.
+    return NULL;
+}
+
+void* plugin_get_proc_address(const char* filename, const char* function_name) {
+    HMEMORYMODULE handle = plugin_get_module_handle(filename);
+    if (handle == NULL) {
+        // This plugin isn't loaded.
+        return NULL;
+    }
+    return MemoryGetProcAddress(handle, function_name);
+}
+
 void load_plugins() {
     static const char* dir = "/plugins/";
     char** file_list = PHYSFS_enumerateFiles(dir);
@@ -68,6 +91,7 @@ void load_plugins() {
 
                     // Copy the filename into the structure.
                     if (loaded_modules[idx].handle != NULL) {
+                        loaded_modules[idx].filename = calloc(1, strlen(*i));
                         strcpy(loaded_modules[idx].filename, *i);
                     }
                     // MemoryLoadLibraryEx automatically calls the DLL/EXE entry point.
