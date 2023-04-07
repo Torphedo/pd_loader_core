@@ -28,29 +28,6 @@ typedef struct {
 static module* loaded_modules = NULL;
 uint32_t module_count = 0;
 
-HMEMORYMODULE custom_load_library(LPCSTR name, void* unused) {
-    // MAX_PATH should be plenty unless someone makes an absolutely ridiculous filename.
-    char path[MAX_PATH] = {0};
-    sprintf(path, "/plugins/%s", name);
-
-    // Try to load from the VFS, allows us to load dependencies from plugins.
-    if (PHYSFS_exists(path)) {
-        PHYSFS_File* module_file = PHYSFS_openRead(path);
-        if (module_file == PHYSFS_ERR_OK) {
-            uint64_t size = PHYSFS_fileLength(module_file);
-            uint8_t* buffer = calloc(1, size);
-            if (buffer != NULL) {
-                PHYSFS_readBytes(module_file, buffer, size);
-                PHYSFS_close(module_file);
-                return MemoryLoadLibraryEx(buffer, size, MemoryDefaultAlloc, MemoryDefaultFree, custom_load_library, MemoryDefaultGetProcAddress, MemoryDefaultFreeLibrary, NULL);
-            }
-        }
-    }
-
-    // It doesn't exist in the search path (or we failed to load the DLL), fall back to the default.
-    return LoadLibraryA(name);
-}
-
 void load_plugins() {
     static const char* dir = "/plugins/";
     char** file_list = PHYSFS_enumerateFiles(dir);
@@ -87,7 +64,7 @@ void load_plugins() {
                 else {
                     PHYSFS_readBytes(dll_file, plugin_data, filesize);
                     // This is a really long one-liner, but this is just MemoryLoadLibrary() but using custom_load_library() to load dependencies.
-                    loaded_modules[idx].handle = MemoryLoadLibraryEx(plugin_data, filesize, MemoryDefaultAlloc, MemoryDefaultFree, custom_load_library, MemoryDefaultGetProcAddress, MemoryDefaultFreeLibrary, NULL);
+                    loaded_modules[idx].handle = MemoryLoadLibrary(plugin_data, filesize);
 
                     // Copy the filename into the structure.
                     if (loaded_modules[idx].handle != NULL) {
