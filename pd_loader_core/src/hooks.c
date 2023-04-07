@@ -1,7 +1,12 @@
 #include <stdio.h>
 
 // Allow use of LPCREATEFILE2_EXTENDED_PARAMETERS on MinGW
-#define _WIN32_WINNT 0x0603
+#ifdef _WIN32_WINNT
+    #if(_WIN32_WINNT <= 0x601)
+        #undef _WIN32_WINNT
+        #define _WIN32_WINNT 0x0602
+    #endif // #if(_WIN32_WINNT <= 0x601)
+#endif // #ifdef _WIN32_WINNT
 
 #include <Windows.h>
 
