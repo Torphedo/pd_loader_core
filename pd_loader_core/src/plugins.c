@@ -26,7 +26,7 @@ typedef struct {
 }module;
 
 static module* loaded_modules = NULL;
-uint32_t plugin_count = 0;
+uint32_t module_count = 0;
 
 HMEMORYMODULE custom_load_library(LPCSTR name, void* unused) {
     // MAX_PATH should be plenty unless someone makes an absolutely ridiculous filename.
@@ -58,11 +58,11 @@ void load_plugins() {
     // Find out how many plugins are in the folder
     for (char**i = file_list; *i != NULL; i++) {
         if (path_has_extension(*i, ".dll") || path_has_extension(*i, ".exe")) {
-            plugin_count++;
+            module_count++;
         }
     }
     // Allocate enough memory to store information for every module, plus some wiggle room just in case.
-    loaded_modules = calloc(plugin_count + 10, sizeof(*loaded_modules));
+    loaded_modules = calloc(module_count + 10, sizeof(*loaded_modules));
 
     uint32_t idx = 0;
     for (char** i = file_list; *i != NULL; i++) {
