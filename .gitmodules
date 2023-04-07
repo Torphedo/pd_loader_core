@@ -4,3 +4,6 @@
 [submodule "ext/minhook"]
 	path = ext/minhook
 	url = https://github.com/TsudaKageyu/minhook
+[submodule "ext/MemoryModule"]
+	path = ext/MemoryModule
+	url = https://github.com/Torphedo/MemoryModule
