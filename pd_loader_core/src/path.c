@@ -18,7 +18,7 @@ void get_ms_esper_path(char* string) {
             // Remove the "AC" from the end of the path
             memset(&ms_esper_path[path_length - 2], 0, 2);
             // Add "RoamingState\" to the end
-            strncat(ms_esper_path, "RoamingState\\", sizeof("RoamingState\\") - 1);
+            strncat(ms_esper_path, "RoamingState\\", sizeof("RoamingState\\"));
             path_length += sizeof("RoamingState\\") - 1;
         }
     }
