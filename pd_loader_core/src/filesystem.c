@@ -30,7 +30,6 @@ void vfs_setup() {
     // Enabling writing to this directory and make the mod / plugin folders if necessary
     PHYSFS_setWriteDir(app_path);
     PHYSFS_mkdir("mods/plugins");
-    PHYSFS_mkdir("fake");
 
     // Add mod folder to the search path. This MUST come before the archive mounting...because the archives
     // are in the mod folder. What a silly thing to mount this after the archives. I have NEVER made this mistake.
