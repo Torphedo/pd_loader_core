@@ -15,6 +15,13 @@ For those interested, more technical info can be found in the "Plugin Developmen
 or questions, check the FAQ section. There (might) already be an answer there.
 
 ## Usage
+To start the game with mods, run `pdpl.exe` (found on the [Releases](https://github.com/Torphedo/pd_loader_core/releases) page).
+The EXE has been getting flagged a LOT more since I moved a bunch of functionality out to `pd_loader_core.dll`, so you
+might need to fight with Windows Defender a little bit to run it. *This will close Phantom Dust if it's already open*.  
+You'll know mods are enabled if the version number on the title screen reads `0.00`. Mods are only enabled when
+you run the game using `pdpl.exe`. After you run `pdpl.exe` for the first time and you can see that the mods are enabled,
+you can delete `pd_loader_core.dll`.
+
 The `mods` folder used by the virtual filesystem is at the following location:   
 `%LOCALAPPDATA%\Packages\Microsoft.MSEsper_8wekyb3d8bbwe\RoamingState\mods`   
 This folder will be created when you run the plugin manager for the first time, or when you run the included
@@ -26,12 +33,6 @@ enabled), I decided to make it into a batch script so that you can read exactly 
 The main executable is (intentionally) quite obfuscated, and I didn't want to make a program that's already flagged 
 fairly hard by Windows Defender require admin permissions for something so small. I'm not entirely sure if it will ask
 for admin permissions, or if you need to right-click it and run it as administrator manually.
-
-To start the game with mods, run `pdpl.exe` (found on the [Releases](https://github.com/Torphedo/pd_loader_core/releases) page).
-The EXE has been getting flagged a LOT more since I moved a bunch of functionality out to `pd_loader_core.dll`, so you
-might need to fight with Windows Defender a little bit to run it. *This will close Phantom Dust if it's already open*.  
-You'll know mods are enabled if the version number on the title screen reads `0.00`. Mods are only enabled when
-you run the game using `pdpl.exe`.
 
 If you want to see console output from mods, you'll have to sideload the game by following [this guide](https://phantomdust.miraheze.org/wiki/Help:Dumping_the_game_files).   
 
