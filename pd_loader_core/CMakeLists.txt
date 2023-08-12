@@ -3,6 +3,7 @@ add_library(pd_loader_core SHARED
 	"src/plugins.c"
 	"src/path.c"
 	"src/filesystem.c"
+	"src/console.c"
 	"src/hooks.c"
 )
 # Add the MinHook library to our DLL

@@ -1,15 +1,17 @@
 #include <stdint.h>
-#include <stdio.h>
 #include <stdbool.h>
 
 #include <MinHook.h> // Also includes Windows.h
 
+#include "console.h"
 #include "hooks.h"
 #include "filesystem.h"
 #include "plugins.h"
 
 void __stdcall loader_main(void* plugin_handle) {
     hooks_setup_lock_files();
+    console_setup(32000);
+    SetConsoleTitle("Phantom Dust Plugin Console");
 
     vfs_setup();
     load_plugins();
