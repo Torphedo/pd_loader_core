@@ -1,7 +1,9 @@
 # Phantom Dust Plugin Loader
 This is a mod loader for the 2017 Windows port of the 2004 Xbox game Phantom Dust. It heavily relies on DLL
-injection to load arbitrary mod code in the game process. Function hooking is also used to intercept/redirect file I/O
-from the game and force it to open modded files (so that modders don't need to replace the original files).
+injection to load arbitrary mod code in the game process. Function hooking is used to intercept file reads/writes and
+force the game to read from a custom mods folder before trying to open the real game files. However, this doesn't work with
+zip or 7zip archives. Mods written in C/C++ can read from archives if they use `PHYSFS_*()` functions, but the game can't
+because of multithreading issues.
 
 DLL injection and the mod loader's [virtual filesystem](https://github.com/icculus/physfs) also provides some extra
 options for modders:
