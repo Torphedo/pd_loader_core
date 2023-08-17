@@ -4,6 +4,7 @@
 
 void* plugin_get_module_handle(const char* filename);
 void* plugin_get_proc_address(const char* filename, const char* function_name);
+void* vfs_load_dll(char* filename);
 void load_plugins();
 
 // The plugin handle received by plugins' DllMain does not get the correct handle,
