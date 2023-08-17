@@ -26,6 +26,9 @@ bool console_setup(int16_t min_height) {
 
         return console_redirect_stdio();
     }
+    else {
+        return false;
+    }
 }
 
 bool console_redirect_stdio() {

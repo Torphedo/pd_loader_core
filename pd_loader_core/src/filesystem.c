@@ -13,7 +13,6 @@
 
 #include "filesystem.h"
 #include "path.h"
-#include "hooks.h"
 
 static const char vfs_msg[] = "[\033[32mVirtual Filesystem\033[0m]";
 static const char vfs_err[] = "[\033[31mVirtual Filesystem\033[0m]";
