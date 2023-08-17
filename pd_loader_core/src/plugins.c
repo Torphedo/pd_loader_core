@@ -69,12 +69,7 @@ void* plugin_get_module_handle(const char* filename) {
     return NULL;
 }
 
-void* plugin_get_proc_address(const char* filename, const char* function_name) {
-    HMEMORYMODULE handle = plugin_get_module_handle(filename);
-    if (handle == NULL) {
-        // This plugin isn't loaded.
-        return NULL;
-    }
+void* plugin_get_proc_address(void* handle, const char* function_name) {
     return MemoryGetProcAddress(handle, function_name);
 }
 
