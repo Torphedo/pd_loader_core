@@ -119,7 +119,6 @@ void* vfs_load_dll(char* filename) {
                                              custom_get_proc_address, MemoryDefaultFreeLibrary, NULL);
 
             // MemoryModule automatically calls the DLL/EXE entry point.
-            printf("%s: Done.\n", loader_msg, filename);
         }
     }
     return handle_out;
