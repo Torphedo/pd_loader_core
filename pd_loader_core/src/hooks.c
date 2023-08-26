@@ -57,26 +57,23 @@ HANDLE hook_CreateFile2(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShare
 		  uint64_t size = PHYSFS_fileLength(archive_file);
 		  FILE* fake_file = fopen(fake_path, "wb");
 		  if (fake_file != NULL) {
-			uint8_t* file_data = malloc(size);
+			uint8_t *file_data = malloc(size);
 			if (file_data == NULL) {
 			  fclose(fake_file);
-			}
-			else {
+			} else {
 			  PHYSFS_readBytes(archive_file, file_data, size);
 			  fwrite(file_data, size, 1, fake_file);
 			  fclose(fake_file);
 			  free(file_data);
+
+			  PHYSFS_utf8ToUtf16(fake_path, wide_path, MAX_PATH);
+			  win_handle = original_CreateFile2(wide_path, dwDesiredAccess, dwShareMode, OPEN_EXISTING, pCreateExParams);
 			}
 		  }
-
-		  PHYSFS_utf8ToUtf16(fake_path, wide_path, MAX_PATH);
-		  printf("Opening a mod file for Windows at %ls.\n", wide_path);
-		  win_handle = original_CreateFile2(wide_path, dwDesiredAccess, dwShareMode, OPEN_EXISTING, pCreateExParams);
 		}
 	  } else {
 		// Give up and just use the original filepath if it's not in PHYSFS.
 		win_handle = original_CreateFile2(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition, pCreateExParams);
-		// printf("[VANILLA CALL] ");
 	  }
 
 	  // Colors the "CreateFile2" message green for read, red for write, and yellow for read/write.
@@ -100,8 +97,6 @@ HANDLE hook_CreateFile2(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShare
 	  // Allows us to see if we're opening from a zip file.
 	  // printf("Opening %s [from real path %s]\n", path, PHYSFS_getRealDir(path));
 
-	  // Uncomment this to watch files open in slow motion and make sure the mutex is working.
-	  // system("pause");
 	  if (!ReleaseMutex(open_mutex)) {
 		printf("CreateFile2(): Failed to release mutex!\n");
 	  }
@@ -112,7 +107,6 @@ HANDLE hook_CreateFile2(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShare
 	  return 0;
 	}
 }
-
 
 void hooks_unlock_filesystem() {
   if (!ReleaseMutex(open_mutex)) {
