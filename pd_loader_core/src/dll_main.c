@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include <MinHook.h> // Also includes Windows.h
 
@@ -16,6 +17,7 @@ void __stdcall loader_main(void* plugin_handle) {
     vfs_setup();
     load_plugins();
 
+    printf("%s: Unlocking files for read/write...\n\n", vfs_msg);
     hooks_unlock_filesystem();
 
     // This loop is just here to keep the virtual filesystem and such alive.

@@ -35,13 +35,13 @@ add_subdirectory(ext/bobtail)
 add_library(pd_loader_core SHARED
 	pd_loader_core/src/dll_main.c
 	pd_loader_core/src/plugins.c
-	pd_loader_core/src/path.c
+    pd_loader_core/src/pd_path.c
 	pd_loader_core/src/filesystem.c
 	pd_loader_core/src/console.c
 	pd_loader_core/src/hooks.c
 )
 
-target_link_libraries(pd_loader_core PRIVATE "-s" minhook physfs-static MemoryModule)
+target_link_libraries(pd_loader_core PRIVATE "-s" minhook physfs-static MemoryModule bobtail)
 target_include_directories(pd_loader_core PRIVATE "../ext/minhook/include" "../ext/physfs/src" "../ext/MemoryModule")
 
 add_executable(pdpl

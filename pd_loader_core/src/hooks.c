@@ -13,9 +13,10 @@
 #include <fileapi.h>
 #include <MinHook.h>
 #include <physfs.h>
+#include <common/path.h>
 
 #include "hooks.h"
-#include "path.h"
+#include "pd_path.h"
 
 // Definitions for the functions we need to hook
 typedef HANDLE (*CREATE_FILE_2)(LPCWSTR, DWORD, DWORD, DWORD, LPCREATEFILE2_EXTENDED_PARAMETERS);
@@ -45,7 +46,7 @@ HANDLE hook_CreateFile2(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShare
 		// The file doesn't exist, make it using the data from the PhysicsFS file.
 		if (win_handle == INVALID_HANDLE_VALUE) {
 		  static char fake_path[MAX_PATH] = {0};
-		  get_ms_esper_path(fake_path);
+            get_roaming_state_path(fake_path);
 		  {
 			static char filename[MAX_PATH] = {0}; // Temporary buffer to store filename
 			path_get_filename(path, filename);

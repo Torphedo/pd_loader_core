@@ -3,32 +3,31 @@
 #include <Windows.h>
 #include <processenv.h>
 
+#include <common/int.h>
+
 #include "console.h"
 
 bool console_setup(int16_t min_height) {
-    if (AllocConsole()) {
-        // Set the screen buffer height for the console
-        CONSOLE_SCREEN_BUFFER_INFO console_info = {0};
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &console_info);
-        if (console_info.dwSize.Y < min_height) {
-            console_info.dwSize.Y = min_height;
-        }
-        SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), console_info.dwSize);
-
-        // Enable ANSI escape codes
-        uint32_t ConsoleMode = 0;
-        GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), (LPDWORD) &ConsoleMode);
-        SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), ConsoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-
-        // Show the console window.
-        HWND window = FindWindowA("ConsoleWindowClass", NULL);
-        ShowWindow(window, SW_SHOW);
-
-        return console_redirect_stdio();
-    }
-    else {
+    if (!AllocConsole()) {
         return false;
     }
+
+    // Set the screen buffer height for the console
+    CONSOLE_SCREEN_BUFFER_INFO console_info = {0};
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &console_info);
+    console_info.dwSize.Y = MAX(console_info.dwSize.Y, min_height);
+    SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), console_info.dwSize);
+
+    // Enable ANSI escape codes
+    u32 ConsoleMode = 0;
+    GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), (LPDWORD) &ConsoleMode);
+    SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), ConsoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+
+    // Show the console window.
+    HWND window = FindWindowA("ConsoleWindowClass", NULL);
+    ShowWindow(window, SW_SHOW);
+
+    return console_redirect_stdio();
 }
 
 bool console_redirect_stdio() {
