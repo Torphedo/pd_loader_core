@@ -12,14 +12,22 @@
 #include "dll.h"
 #include "process.h"
 
-int main() {
+int main(int argc, char** argv) {
     static char core_path[MAX_PATH] = {0};
     // Copy pd_loader_core.dll to a place where it can be read by the game, if it doesn't exist there.
     SHGetFolderPathA(0, CSIDL_LOCAL_APPDATA, NULL, 0, core_path);
     strncat(core_path, "\\Packages\\Microsoft.MSEsper_8wekyb3d8bbwe\\RoamingState\\mods", sizeof(core_path) - 1);
     _mkdir(core_path);
     strncat(core_path, "\\pd_loader_core.dll", sizeof(core_path) - 1);
-    if (!file_exists(core_path)) {
+
+    bool force_copy = false;
+    if (argc > 1) {
+        if (strcmp(argv[1], "--force-copy") == 0) {
+            force_copy = true;
+        }
+    }
+
+    if (!file_exists(core_path) || force_copy) {
         if (!file_exists("pd_loader_core.dll")) {
             LOG_MSG(error, "Couldn't find pd_loader_core.dll. Please place this file in the mods folder or next to the program.\n");
             system("pause");
