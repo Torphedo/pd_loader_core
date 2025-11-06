@@ -32,8 +32,7 @@ HCUSTOMMODULE custom_load_library(const char* filename, void* userdata) {
     sprintf(vpath, "/plugins/%s", filename);
     if (PHYSFS_exists(vpath)) {
         handle_out = vfs_load_dll(vpath);
-    }
-    else {
+    } else {
         handle_out = LoadLibraryA(filename);
     }
     return handle_out;
@@ -75,19 +74,21 @@ void* plugin_get_proc_address(void* handle, const char* function_name) {
 }
 
 void plugin_cleanup(void* plugin_handle) {
-    if (plugin_handle != NULL) {
-        // Remove the old handle from the list.
-        for (uint32_t i = 0; i < module_count; i++) {
-            if (loaded_modules[i].handle == plugin_handle) {
-                loaded_modules[i].handle = NULL;
-            }
-        }
-
-        MemoryFreeLibrary(plugin_handle);
+    if (!plugin_handle) {
+        return;
     }
+
+    // Remove the old handle from the list.
+    for (uint32_t i = 0; i < module_count; i++) {
+        if (loaded_modules[i].handle == plugin_handle) {
+            loaded_modules[i].handle = NULL;
+        }
+    }
+
+    MemoryFreeLibrary(plugin_handle);
 }
 
-void* vfs_load_dll(char* filename) {
+void* vfs_load_dll(const char* filename) {
     void* handle_out = plugin_get_module_handle(filename);
 
     printf("%s: Loading %s...\n", loader_msg, filename);
@@ -104,24 +105,25 @@ void* vfs_load_dll(char* filename) {
 
     // Read file into a buffer and load it with MemoryModule.
     PHYSFS_File* dll_file = PHYSFS_openRead(vpath);
-    if (dll_file == NULL) {
+    if (!dll_file) {
         printf("%s: Failed to open %s for reading (PHYSFS).\n", loader_err, vpath);
+        return handle_out;
     }
-    else {
-        int64_t filesize = PHYSFS_fileLength(dll_file);
-        uint8_t *plugin_data = calloc(1, filesize);
-        if (plugin_data == NULL) {
-            printf("%s: Failed to allocate %lli bytes for %s (PHYSFS).\n", loader_err, filesize, vpath);
-        } else {
-            PHYSFS_readBytes(dll_file, plugin_data, filesize);
 
-            // Load the library, using our custom LoadLibrary and GetProcAddress code to resolve imports.
-            handle_out = MemoryLoadLibraryEx(plugin_data, filesize, MemoryDefaultAlloc, MemoryDefaultFree, custom_load_library,
-                                             custom_get_proc_address, MemoryDefaultFreeLibrary, NULL);
+    const int64_t filesize = PHYSFS_fileLength(dll_file);
+    uint8_t *plugin_data = calloc(1, filesize);
+    if (plugin_data == NULL) {
+        printf("%s: Failed to allocate %lli bytes for %s (PHYSFS).\n", loader_err, filesize, vpath);
+    } else {
+        PHYSFS_readBytes(dll_file, plugin_data, filesize);
 
-            // MemoryModule automatically calls the DLL/EXE entry point.
-        }
+        // Load the library, using our custom LoadLibrary and GetProcAddress code to resolve imports.
+        handle_out = MemoryLoadLibraryEx(plugin_data, filesize, MemoryDefaultAlloc, MemoryDefaultFree, custom_load_library,
+                                         custom_get_proc_address, MemoryDefaultFreeLibrary, NULL);
+
+        // MemoryModule automatically calls the DLL/EXE entry point.
     }
+    PHYSFS_close(dll_file);
     return handle_out;
 }
 
