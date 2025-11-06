@@ -7,3 +7,6 @@
 [submodule "ext/MemoryModule"]
 	path = ext/MemoryModule
 	url = https://github.com/Torphedo/MemoryModule
+[submodule "ext/bobtail"]
+	path = ext/bobtail
+	url = https://github.com/torphedo/bobtail
