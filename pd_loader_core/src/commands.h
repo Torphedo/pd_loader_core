@@ -1,4 +1,7 @@
 #pragma once
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stdbool.h>
 
 typedef int (*command_func)(int argc, char** argv);
@@ -42,3 +45,7 @@ char* command_getoption(int argc, char** argv, const char* option, const char* s
 /// @param shorthand Short form of your option name
 /// @return Whether the flag was present
 bool command_getflag(int argc, char** argv, const char* option, const char* shorthand);
+
+#ifdef __cplusplus
+}
+#endif

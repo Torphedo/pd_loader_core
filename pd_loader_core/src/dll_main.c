@@ -13,16 +13,17 @@
 bool running = true;
 int command_exit(int argc, char** argv) {
     running = false;
+    return 0;
 }
 
 void __stdcall loader_main(void* plugin_handle) {
     hooks_setup_lock_files();
+    command_sys_init();
     console_setup(32000);
     SetConsoleTitle("Phantom Dust Plugin Console");
 
     vfs_setup();
     load_plugins();
-    command_sys_init();
     command_register(command_exit, "", "exit");
     command_register(command_exit, "", "quit");
 
