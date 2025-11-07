@@ -63,13 +63,6 @@ Q: The game is failing to load the files I put in the mods folder, even though I
 going on?  
 A: You probably accidentally moved the file instead of copying it.
 
-Q: Why don't you provide / publish the source code for pdpl.exe?  
-A: I want to make it as difficult as possible to cheat in normal multiplayer lobbies using my tool(s). With source code
-access, anyone could easily remove all of my anti-cheating measures and recompile it. This is also why I chose to use C
-instead of a higher-level language like C#. I understand that being closed-source comes off a bit sketchy to some people
-(especially because the main executable does DLL injection), but I don't feel that I can safely open-source it without
-causing damage to the unusually healthy multiplayer scene of this game.
-
 ## Plugin Development
 
 The `single_skills.dll` mod essentially serves as an example / proof of concept mod for this mod loader. The source
@@ -81,8 +74,6 @@ sure about C++ `std::cout`. If it doesn't work, try running `std::ios_base::sync
 and test plugins are written in C99, so I haven't tested it.  
 The entry point for your plugin is a normal `DllMain()`. Read the [single_skills source code](https://github.com/Torphedo/single_skills/blob/master/single_skills/src/dll_main.c#L203-L211)
 or [Microsoft's documentation](https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain) for more details.
-
-Note: `pd_loader_core` is normally compiled with MinGW. It compiles on MSVC, but will crash a few seconds after starting.
 
 Plugins are manually mapped into the game by [MemoryModule](https://github.com/Torphedo/MemoryModule), so they're not
 visible in any module list like normal DLLs are. However, you can still import functions from other plugin DLLs or from
@@ -108,6 +99,7 @@ Hooking isn't useful for everything, but when you need it, it's amazing. Here ar
 - Rewrite a function that loads 3D models to use a common format like `.gltf` or `.obj`
 - Intercept a function processing input data to make your own keybinds or completely disable certain buttons
 - Intercept calls from DirectX to make the game load shaders from source code (instead of `.cso` bytecode) and compile them at runtime
+- Reload the map on-demand
 
 ### Filesystem
 The `PHYSFS_*` functions give you access to the [PhysicsFS](https://github.com/icculus/physfs) virtual filesystem,
