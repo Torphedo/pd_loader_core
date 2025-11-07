@@ -10,6 +10,11 @@
 #include "plugins.h"
 #include "commands.h"
 
+bool running = true;
+int command_exit(int argc, char** argv) {
+    running = false;
+}
+
 void __stdcall loader_main(void* plugin_handle) {
     hooks_setup_lock_files();
     console_setup(32000);
@@ -18,16 +23,17 @@ void __stdcall loader_main(void* plugin_handle) {
     vfs_setup();
     load_plugins();
     command_sys_init();
-
-    command_exec("pd_loader_core!hello \"test\" --value \"long form value\"");
-    command_exec("pd_loader_core!hello \"test\" -v \"shorthand value\"");
+    command_register(command_exit, "", "exit");
+    command_register(command_exit, "", "quit");
 
     printf("%s: Unlocking files for read/write...\n\n", vfs_msg);
     hooks_unlock_filesystem();
 
-    // This loop is just here to keep the virtual filesystem and such alive.
-    while (true) {
-        Sleep(100);
+    while (running) {
+        char line[MAX_PATH] = {0};
+        printf("> ");
+        fgets(line, ARRAYSIZE(line), stdin);
+        command_exec(line);
     }
 }
 

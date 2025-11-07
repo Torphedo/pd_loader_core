@@ -12,7 +12,7 @@
 hashbuckets_desc commands = {0};
 
 int command_hello(int argc, char** argv) {
-    LOG_MSG(info, "This is a test command. Hello, world!\n");
+    LOG_MSG(info, "Hello, world!\n");
     for (u32 i = 0; i < argc; i++) {
         LOG_MSG(debug, "arg %d: '%s'\n", i, argv[i]);
     }
@@ -29,7 +29,7 @@ int command_hello(int argc, char** argv) {
 bool command_sys_init() {
     commands = hb_create(32, 32, sizeof(command_func));
 
-    command_register(command_hello, "pd_loader_core", "hello");
+    command_register(command_hello, "core", "hello");
 
     return commands.buckets != NULL;
 }
@@ -110,7 +110,6 @@ bool parse_args(const char* txt, int* argc_out, char*** argv_out) {
     list_destroy(&filtered_tokens);
 
     if (args.end_idx < 1) {
-        LOG_MSG(error, "The command '%s' was empty.\n", txt);
         return false;
     }
 
