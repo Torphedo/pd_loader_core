@@ -19,7 +19,8 @@ void __stdcall loader_main(void* plugin_handle) {
     load_plugins();
     command_sys_init();
 
-    exec_command("pd_loader_core!hello \"test\" ");
+    command_exec("pd_loader_core!hello \"test\" --value \"long form value\"");
+    command_exec("pd_loader_core!hello \"test\" -v \"shorthand value\"");
 
     printf("%s: Unlocking files for read/write...\n\n", vfs_msg);
     hooks_unlock_filesystem();

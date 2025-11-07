@@ -17,13 +17,19 @@ int command_hello(int argc, char** argv) {
         LOG_MSG(debug, "arg %d: '%s'\n", i, argv[i]);
     }
 
+    // This matches --value and -v
+    const char* val = command_getoption(argc, argv, "value", "v");
+    if (val) {
+        LOG_MSG(info, "You found the secret flag! The value is '%s'\n", val);
+    }
+
     return 0;
 }
 
 bool command_sys_init() {
     commands = hb_create(32, 32, sizeof(command_func));
 
-    plugin_register_command(command_hello, "pd_loader_core", "hello");
+    command_register(command_hello, "pd_loader_core", "hello");
 
     return commands.buckets != NULL;
 }
@@ -32,7 +38,7 @@ void command_sys_deinit() {
     hb_destroy(&commands);
 }
 
-void plugin_register_command(command_func command, const char* module_name, const char* command_name) {
+void command_register(command_func command, const char* module_name, const char* command_name) {
     // If your command name is longer than this, you have bigger problems.
     char cmd_name[128] = {0};
     snprintf(cmd_name, ARRAY_SIZE(cmd_name), "%s!%s", module_name, command_name);
@@ -71,6 +77,9 @@ bool parse_args(const char* txt, int* argc_out, char*** argv_out) {
         const char* str = txt + tok.offset;
         if (str[0] == '"') {
             in_quotes = !in_quotes;
+            if (!in_quotes) {
+                num_quoted_tokens = 0; // We're leaving the quotes, reset this
+            }
             continue; // Cut out the quote tokens
         }
 
@@ -110,7 +119,7 @@ bool parse_args(const char* txt, int* argc_out, char*** argv_out) {
     return true;
 }
 
-int exec_command(const char* command_txt) {
+int command_exec(const char* command_txt) {
     int argc = 0;
     char** argv = NULL;
     if (!parse_args(command_txt, &argc, &argv)) {
@@ -129,4 +138,54 @@ int exec_command(const char* command_txt) {
     }
 
     return result;
+}
+char* command_getoption(int argc, char** argv, const char* option, const char* shorthand) {
+    // Make our pointers always non-NULL
+    option = (option) ? option : "";
+    shorthand = (shorthand) ? shorthand : "";
+
+    char* result = NULL;
+    bool hit = false;
+    for (u32 i = 0; i < argc; i++) {
+        char* arg = argv[i];
+        if (hit) {
+            // Last arg was the flag, this must be the value
+            result = arg;
+            break;
+        }
+
+        // Skip up to 2 dashes to handle long and short hand flags
+        for (u32 j = 0; j < 2; j++) {
+            if (*arg == '-') {
+                arg++;
+            }
+        }
+        hit = (strcmp(arg, option) == 0) || (strcmp(arg, shorthand) == 0);
+    }
+
+    return result;
+}
+
+bool command_getflag(int argc, char** argv, const char* option, const char* shorthand) {
+    // Make our pointers always non-NULL
+    option = (option) ? option : "";
+    shorthand = (shorthand) ? shorthand : "";
+
+    char* result = NULL;
+    for (u32 i = 0; i < argc; i++) {
+        char* arg = argv[i];
+
+        // Skip up to 2 dashes to handle long and short hand flags
+        for (u32 j = 0; j < 2; j++) {
+            if (*arg == '-') {
+                arg++;
+            }
+        }
+        bool hit = (strcmp(arg, option) == 0) || (strcmp(arg, shorthand) == 0);
+        if (hit) {
+            return true;
+        }
+    }
+
+    return false;
 }
