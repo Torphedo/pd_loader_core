@@ -14,7 +14,7 @@
 #include <common/path.h>
 
 #include "pd_path.h"
-#include "plugins.h"
+#include "plugins_internal.h"
 
 static const char loader_msg[] = "[\033[32mPlugin Loader\033[0m]";  // Green
 static const char loader_warn[] = "[\033[33mPlugin Loader\033[0m]"; // Yellow

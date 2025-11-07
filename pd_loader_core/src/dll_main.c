@@ -7,7 +7,7 @@
 #include "console.h"
 #include "hooks.h"
 #include "filesystem.h"
-#include "plugins.h"
+#include "plugins_internal.h"
 #include "commands.h"
 
 bool running = true;

@@ -4,6 +4,8 @@ extern "C" {
 #endif
 #include <stdbool.h>
 
+#define PLUGIN_API __cdecl
+
 typedef int (*command_func)(int argc, char** argv);
 
 // Initialize internal state for the command system
