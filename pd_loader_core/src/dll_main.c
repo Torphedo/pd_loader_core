@@ -8,6 +8,7 @@
 #include "hooks.h"
 #include "filesystem.h"
 #include "plugins.h"
+#include "commands.h"
 
 void __stdcall loader_main(void* plugin_handle) {
     hooks_setup_lock_files();
@@ -16,6 +17,9 @@ void __stdcall loader_main(void* plugin_handle) {
 
     vfs_setup();
     load_plugins();
+    command_sys_init();
+
+    exec_command("pd_loader_core!hello \"test\" ");
 
     printf("%s: Unlocking files for read/write...\n\n", vfs_msg);
     hooks_unlock_filesystem();

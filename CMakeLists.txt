@@ -39,6 +39,7 @@ add_library(pd_loader_core SHARED
 	pd_loader_core/src/filesystem.c
 	pd_loader_core/src/console.c
 	pd_loader_core/src/hooks.c
+    pd_loader_core/src/commands.c
 )
 
 target_link_libraries(pd_loader_core PRIVATE "-s" minhook physfs-static MemoryModule bobtail)
