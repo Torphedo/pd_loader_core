@@ -27,6 +27,11 @@ void get_roaming_state_path(char* string) {
     strncpy(string, ms_esper_path, path_length);
 }
 
+void get_fake_file_path(char* string) {
+    get_roaming_state_path(string);
+    strcat(string, "fake");
+}
+
 void get_pd_path(char* out) {
     // Get path to Phantom Dust files by getting location of PDUWP.exe and truncating the filename
     GetModuleFileNameA(NULL, out, MAX_PATH);

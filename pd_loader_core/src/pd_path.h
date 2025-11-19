@@ -5,6 +5,9 @@
 /// @param string Output buffer
 void get_roaming_state_path(char* string);
 
+/// @brief Get the path of the "fake" folder used to temporarily extract files from archives
+void get_fake_file_path(char* string);
+
 /// @brief Get path of the folder containing PDUWP.exe
 void get_pd_path(char* out);
 
