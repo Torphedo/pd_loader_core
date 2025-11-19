@@ -18,6 +18,7 @@
 
 #include "hooks.h"
 #include "pd_path.h"
+#include "filesystem.h"
 
 // Definitions for the functions we need to hook
 typedef HANDLE (*CREATE_FILE_2)(LPCWSTR, DWORD, DWORD, DWORD, LPCREATEFILE2_EXTENDED_PARAMETERS);
@@ -37,12 +38,35 @@ HANDLE hook_CreateFile2(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShare
       PHYSFS_utf8FromUtf16(lpFileName, path, MAX_PATH);
       path_make_physfs_friendly(path);
 
+      // Colors the "CreateFile2" message green for read, red for write, and yellow for read/write.
+      switch (dwDesiredAccess) {
+      case GENERIC_READ:
+          printf("\033[32m");
+          break;
+      case GENERIC_WRITE:
+          printf("\033[31m");
+          break;
+      case (GENERIC_READ | GENERIC_WRITE):
+          printf("\033[33m");
+          break;
+      default:
+          // Just print in white for other permissions
+          break;
+      }
+      printf("CreateFile2");
+      printf("\033[0m(): "); // Reset to white before printing "()"
+      printf("Opening %s\n", path);
+      // Allows us to see if we're opening from a zip file.
+      // printf("Opening %s [from real path %s]\n", path, PHYSFS_getRealDir(path));
+
       HANDLE win_handle = NULL;
 
-      // Try to open the file with the default function.
-      if (PHYSFS_exists(path)) {
-          wchar_t wide_path[MAX_PATH] = {0};
+      if (!PHYSFS_exists(path)) {
+          // It's not in PHYSFS, just open it normally.
+          win_handle = original_CreateFile2(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition, pCreateExParams);
+      } else {
           // Get the real path of the file and place it in a wide string.
+          wchar_t wide_path[MAX_PATH] = {0};
           swprintf(wide_path, MAX_PATH, L"%hs/%hs", PHYSFS_getRealDir(path), path);
           win_handle = original_CreateFile2(wide_path, dwDesiredAccess, dwShareMode, dwCreationDisposition, pCreateExParams);
 
@@ -57,65 +81,27 @@ HANDLE hook_CreateFile2(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShare
                   sprintf(fake_path, "%s\\%s", fake_path, filename);
               }
 
-              // Create a new file with the appropriate size in the /fake/ folder.
-              PHYSFS_File* archive_file = PHYSFS_openRead(path);
-              uint64_t size = PHYSFS_fileLength(archive_file);
-              FILE* fake_file = fopen(fake_path, "wb");
-              if (fake_file != NULL) {
-                  uint8_t *file_data = malloc(size);
-                  if (file_data == NULL) {
-                      LOG_MSG(error, "Failed to create temporary file '%s' to support zipmod file '%s'.\n", fake_path, path);
-                      fflush(stdout);
-                      fclose(fake_file);
-                  } else {
-                      PHYSFS_readBytes(archive_file, file_data, size);
-                      fwrite(file_data, size, 1, fake_file);
-                      fclose(fake_file);
-                      free(file_data);
-
-                      PHYSFS_utf8ToUtf16(fake_path, wide_path, MAX_PATH);
-                      win_handle = original_CreateFile2(wide_path, dwDesiredAccess, dwShareMode, OPEN_EXISTING, pCreateExParams);
-                  }
+              // Copy the VFS file to the real filesystem, in the /fake/ folder.
+              if (!dump_vfs_file(path, fake_path)) {
+                  printf(vfs_err "Failed to extract zipmod file '%s'", path);
+              } else {
+                  PHYSFS_utf8ToUtf16(fake_path, wide_path, MAX_PATH);
+                  win_handle = original_CreateFile2(wide_path, dwDesiredAccess, dwShareMode, OPEN_EXISTING, pCreateExParams);
               }
           }
-      } else {
-          // Give up and just use the original filepath if it's not in PHYSFS.
-          win_handle = original_CreateFile2(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition, pCreateExParams);
       }
 
-    // Colors the "CreateFile2" message green for read, red for write, and yellow for read/write.
-    switch (dwDesiredAccess) {
-        case GENERIC_READ:
-            printf("\033[32m");
-            break;
-        case GENERIC_WRITE:
-            printf("\033[31m");
-            break;
-        case (GENERIC_READ | GENERIC_WRITE):
-            printf("\033[33m");
-            break;
-        default:
-            // Just print in white for other permissions
-            break;
-    }
-    printf("CreateFile2");
-    printf("\033[0m(): "); // Reset to white before printing "()"
-    printf("Opening %s\n", path);
-    // Allows us to see if we're opening from a zip file.
-    // printf("Opening %s [from real path %s]\n", path, PHYSFS_getRealDir(path));
-
-    if (!ReleaseMutex(open_mutex)) {
-        printf("CreateFile2(): Failed to release mutex!\n");
-    }
-    return win_handle;
+      if (!ReleaseMutex(open_mutex)) {
+          printf("CreateFile2(): Failed to release mutex!\n");
+      }
+      return win_handle;
 }
 
 void hooks_unlock_filesystem() {
   if (!ReleaseMutex(open_mutex)) {
-	printf("Failed to release filesystem mutex!\n");
-  }
-  else {
-	printf("Unlocking filesystem...\n");
+	printf(vfs_err "Failed to release filesystem mutex!\n");
+  } else {
+	printf(vfs_msg "Unlocking filesystem...\n");
   }
 }
 
