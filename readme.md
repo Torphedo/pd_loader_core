@@ -15,21 +15,19 @@ For those interested, more technical info can be found in the "Plugin Developmen
 or questions, check the FAQ section. There (might) already be an answer there.
 
 ## Usage
-The `mods` folder used by the virtual filesystem is at the following location:   
-`%LOCALAPPDATA%\Packages\Microsoft.MSEsper_8wekyb3d8bbwe\RoamingState\mods`   
-This folder will be created when you run the plugin manager for the first time, or when you run the included
-`setup_junction.bat` script. This script sets up a hard link (similar to a shortcut) that lets you easily access the
-mods folder without needing to go to this long folder path every time.
+When you run PDPL for the first time, a `mods` folder will be created next to the EXE, and `pd_loader_core.dll` will be
+copied into the folder. Don't create a `mods` folder yourself, because the one PDPL creates is actually a junction
+(like a shortcut) to `%LOCALAPPDATA%\Packages\Microsoft.MSEsper_8wekyb3d8bbwe\RoamingState\mods`. This path is the only
+place where the game is allowed load files from.     
 
 To start the game with mods, run `pdpl.exe` (found on the [Releases](https://github.com/Torphedo/pd_loader_core/releases) page).
 *This will close Phantom Dust if it's already open*.
-You'll know mods are enabled if the version number on the title screen reads `0.00`. Mods are only enabled when
-you run the game using `pdpl.exe`.
+Mods are only enabled when you run the game using `pdpl.exe`.
 
 If you want to see console output from mods, you'll have to sideload the game by following [this guide](https://phantomdust.miraheze.org/wiki/Help:Dumping_the_game_files).   
 
 Whenever you put anything into the `mods` folder, ***make sure to copy the file(s), not move them***. If you move the
-file, it won't be encrypted correctly by Windows and neither the game nor the mods will be able to read it.
+file, it won't have its permissions set correctly by Windows, and neither the game nor the mods will be able to read it.
 
 # Editing Game Files
 To replace a file in the game, place it in the mods folder with the same path it would have in the original game.   
@@ -37,22 +35,13 @@ For example: to replace Edgar's third outfit (located at `Assets/Data/Player/pc0
 edited `pc01a2.alr` to `mods/Assets/Data/player/pc01a/pc01a2.alr`. This only applies to files that you can see being
 opened in the console (prefixed with `CreateFile2(): `).   
 Files like `.mp4` cutscenes and `.cso` DirectX shaders can't be replaced using this program (yet), but the code which
-loads mod files is in this repo at `pd_loader_core/src/hooks.c`.
+loads mod files is in this repo at `pd_loader_core/src/hooks.c`. Paths in the mod loader are *case sensitive*! Usually,
+the `Assets/Data/` part of the path has the first letter capitalized, and everything else (like `/map/`) is in lowercase.
+If you're not sure, look at the console to see what path the game is trying to open.
 
 # Installing Mods
 To install a plugin, just copy the DLL file into the `mods/plugins` folder and run `pdpl.exe`. If the plugin came as a
-`.zip` or `.7z` file, then copy it to the `mods` folder (*not* `mods/plugins`).
-
-The release includes a plugin you can test with, inside `single_skills.7z`. This mod lets you load custom skill files
-and text from the `mods/skills` and `mods/skills/text` folders, without needing to edit a single large file for all of
-them. Source code for the mod is available [here](https://github.com/Torphedo/single_skills). To install the mod, copy
-the `single_skills.7z` file into the `mods` folder.
-
-The release also includes a simple test skill for you to test that mod. It makes `Rapid Cannon` bouncy and renames it
-to `Bullet Hell`. To use it, copy the `bullet_hell.7z` file into the `mods` folder.
-
-Original game files can also be replaced by ones in `.zip` or `.7z` archives. This makes it easy to install mods without
-needing to install 7zip or extract anything.
+`.zip` or `.7z` file, then copy it to the `mods` folder (*not* `mods/plugins`), and don't unzip it.
 
 ## FAQ
 Q: It's not allowing me to put files in the mods folder. What's wrong?  
