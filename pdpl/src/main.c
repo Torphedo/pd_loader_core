@@ -4,7 +4,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <shlobj.h>
-#include <direct.h>
 
 #include <common/file.h>
 #include <common/logging.h>
@@ -13,11 +12,20 @@
 #include "process.h"
 
 int main(int argc, char** argv) {
-    static char core_path[MAX_PATH] = {0};
-    // Copy pd_loader_core.dll to a place where it can be read by the game, if it doesn't exist there.
+    // Make sure %LOCALAPPDATA%\Packages\Microsoft.MSEsper_8wekyb3d8bbwe\RoamingState\mods exists
+    char core_path[MAX_PATH] = {0};
     SHGetFolderPathA(0, CSIDL_LOCAL_APPDATA, NULL, 0, core_path);
     strncat(core_path, "\\Packages\\Microsoft.MSEsper_8wekyb3d8bbwe\\RoamingState\\mods", sizeof(core_path) - 1);
-    _mkdir(core_path);
+    CreateDirectoryA(core_path, NULL);
+
+    // Make sure /mods/plugins/ exists
+    char plugins_path[MAX_PATH] = {0};
+    strncpy(plugins_path, core_path, sizeof(plugins_path) - 1);
+    strncat(plugins_path, "\\plugins", sizeof(plugins_path) - 1);
+    CreateDirectoryA(plugins_path, NULL);
+
+    // We need to copy pd_loader_core.dll to a place where it can be read by the
+    // game (the mods folder), if it doesn't exist there.
     strncat(core_path, "\\pd_loader_core.dll", sizeof(core_path) - 1);
 
     bool force_copy = false;
@@ -39,6 +47,10 @@ int main(int argc, char** argv) {
 
     // The easy way, but sometimes flagged by antivirus for being a giant command.
     // system("if not exist %LOCALAPPDATA%\\Packages\\Microsoft.MSEsper_8wekyb3d8bbwe\\RoamingState\\mods\\pd_loader_core.dll (cp pd_loader_core.dll %LOCALAPPDATA%\\Packages\\Microsoft.MSEsper_8wekyb3d8bbwe\\RoamingState\\mods\\pd_loader_core.dll)");
+
+    if (!file_exists("mods")) {
+        system("mklink /J mods %LOCALAPPDATA%\\Packages\\Microsoft.MSEsper_8wekyb3d8bbwe\\RoamingState\\mods");
+    }
 
     // Kill Phantom Dust if it's already running
     uint32_t process_id = get_pid_by_name("PDUWP.exe");

@@ -7,7 +7,6 @@
 #define NOCLIPBOARD
 #define NODRAWTEXT
 #define NOMB
-
 #include <Windows.h>
 
 #include <physfs.h>
