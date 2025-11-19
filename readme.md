@@ -1,28 +1,18 @@
 # Phantom Dust Plugin Loader
-This is a mod loader for the 2017 Windows port of the 2004 Xbox game Phantom Dust. It heavily relies on DLL
-injection to load arbitrary mod code in the game process. Function hooking is also used to intercept/redirect file I/O
-from the game and force it to open modded files (so that modders don't need to replace the original files).
+This is a mod loader for the 2017 Windows port of the 2004 Xbox game Phantom Dust. It uses DLL
+injection to load code and asset mods without needing read/write access to the game files.
 
-DLL injection and the mod loader's [virtual filesystem](https://github.com/icculus/physfs) also provides some extra
-options for modders:
-- Add extra functionality that runs before or after any function in the game
-- Completely replace any function in the game with their own code
-- Read and write directly to the game's memory without the overhead and occasional permission problems of WinAPI
-- Effortlessly read/write files from the original game, the mods folder, or .zip / .7z archives in the mods folder.
-  The virtual filesystem handles file I/O from archives and figures out which of the 3 locations to use automatically.
-
-For those interested, more technical info can be found in the "Plugin Development" section. If you have any problems
-or questions, check the FAQ section. There (might) already be an answer there.
 
 ## Usage
-When you run PDPL for the first time, a `mods` folder will be created next to the EXE, and `pd_loader_core.dll` will be
-copied into the folder. Don't create a `mods` folder yourself, because the one PDPL creates is actually a junction
-(like a shortcut) to `%LOCALAPPDATA%\Packages\Microsoft.MSEsper_8wekyb3d8bbwe\RoamingState\mods`. This path is the only
-place where the game is allowed load files from.     
+Download PDPL from [here](https://github.com/Torphedo/pd_loader_core/releases), then unzip it to a
+folder and run `pdpl.exe`. This will create a shortcut to the mods folder, then run Phantom Dust.
+Don't create a `mods` folder yourself, because the one PDPL creates is actually a junction (like
+a shortcut) to `%LOCALAPPDATA%\Packages\Microsoft.MSEsper_8wekyb3d8bbwe\RoamingState\mods`. This
+path is the only place where the game is allowed to load files from.     
 
-To start the game with mods, run `pdpl.exe` (found on the [Releases](https://github.com/Torphedo/pd_loader_core/releases) page).
-*This will close Phantom Dust if it's already open*.
-Mods are only enabled when you run the game using `pdpl.exe`.
+Now copy `DebugMenu.7z` into the `mods` folder (don't unzip it!), and run `pdpl.exe` again. Phantom Dust
+should close and re-open, and you should see some new menu options throughout the game. If you run
+the game again normally, everything will be back to normal.
 
 If you want to see console output from mods, you'll have to sideload the game by following [this guide](https://phantomdust.miraheze.org/wiki/Help:Dumping_the_game_files).   
 
@@ -53,11 +43,16 @@ going on?
 A: You probably accidentally moved the file instead of copying it.
 
 ## Plugin Development
+Using PDPL, you can:
+- Add extra functionality that runs before or after any function in the game
+- Completely replace any function in the game with custom code
+- Read and write directly to the game's memory without the overhead of the Windows API
+- Seamlessly read/write files from the original game, the mods folder, or .zip / .7z archives in the mods folder.
+  The virtual filesystem handles file I/O from archives and figures out which of the 3 locations to use automatically.
 
 The `single_skills.dll` mod essentially serves as an example / proof of concept mod for this mod loader. The source
 code is available [here](https://github.com/Torphedo/single_skills).
 
-### Building
 Plugins can be written in standard C or C++. Standard output is sent to the plugin console automatically, but I'm not
 sure about C++ `std::cout`. If it doesn't work, try running `std::ios_base::sync_with_stdio(true);` first. My program
 and test plugins are written in C99, so I haven't tested it.  
@@ -71,11 +66,11 @@ to link with the core loader, and headers to access the filesystem API. The `sin
 this linking.
 
 ### Direct Memory Access
-One major benefit DLL injection provides is that your code can directly read/write game memory. Game functions and
-variables are stored at a static offset from the main module `PDUWP.exe`. You can use this to hardcode locations into
-your code without needing to search for some data structure or piece of code in memory. This is used in `single_skills`
-to hook the function that loads skill data/text, and read/write the modded data to a pre-determined location the game
-reads it from. ([Direct link to relevant code](https://github.com/Torphedo/single_skills/blob/master/single_skills/src/dll_main.c#L176-L179))
+In a plugin, you can directly read/write game memory. Game functions and statically allocated data are stored at a
+static offset from the main module `PDUWP.exe`. You can use this to hardcode locations into your code without needing to
+search for some data structure or piece of code in memory. This is used in `single_skills` to hook the function that
+loads skill data/text, and read/write the modded data to a pre-determined location the game reads it from.
+([Direct link to relevant code](https://github.com/Torphedo/single_skills/blob/master/single_skills/src/dll_main.c#L176-L179))
 
 ### Hooking
 To change the behaviour of a function, use the MinHook library (https://github.com/TsudaKageyu/minhook).
@@ -99,9 +94,10 @@ automatically figure out which location to use in the following order of priorit
     2. Loose files in the mods folder
     3. Original game folder
 ```
-Keep in mind that `.` and `..` directories are not allowed in PhysicsFS calls and will fail. For documentation on
-exactly what each PhysicsFS function does, search for a function in the header file, or their
-[documentation](http://www.icculus.org/physfs/docs/html/physfs_8h.html).
+Because of the mod loader's function hooks, you'll also be able to read data from zip files using the standard C/C++
+file I/O interfaces. If using PhysicsFS directly, keep in mind that `.` and `..` directories are not allowed in the
+VFS paths and will fail. For documentation on exactly what each PhysicsFS function does, search for a function in
+the header file, or their [documentation](http://www.icculus.org/physfs/docs/html/physfs_8h.html).
 
 By default, the write directory for PhysicsFS is the `RoamingState` folder which contains the `mods` folder.
 
