@@ -10,9 +10,10 @@ Don't create a `mods` folder yourself, because the one PDPL creates is actually 
 a shortcut) to `%LOCALAPPDATA%\Packages\Microsoft.MSEsper_8wekyb3d8bbwe\RoamingState\mods`. This
 path is the only place where the game is allowed to load files from.     
 
-Now copy `DebugMenu.7z` into the `mods` folder (don't unzip it!), and run `pdpl.exe` again. Phantom Dust
-should close and re-open, and you should see some new menu options throughout the game. If you run
-the game again normally, everything will be back to normal.
+Most mods are `.zip` or `.7z` files, which you can copy into the `mods` folder without needing to unzip
+them. The release comes with an example mod, `DebugMenu.7z`. If you install this to the `mods` folder
+and run `pdpl.exe` again, Phantom Dust will close and re-open. Once it boots up, you should see some
+new menu options throughout the game. If you run the game again without PDPL, everything will be back to normal.
 
 If you want to see console output from mods, you'll have to sideload the game by following [this guide](https://phantomdust.miraheze.org/wiki/Help:Dumping_the_game_files).   
 
