@@ -38,7 +38,7 @@ HCUSTOMMODULE custom_load_library(const char* filename, void* userdata) {
 
     sprintf(vpath, "/plugins/%s", filename);
     if (PHYSFS_exists(vpath)) {
-        handle_out = vfs_load_dll(vpath);
+        handle_out = vfs_load_dll(filename);
     }
     if (handle_out == NULL) {
         handle_out = LoadLibraryA(filename);
