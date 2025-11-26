@@ -26,24 +26,28 @@ HCUSTOMMODULE custom_load_library(const char* filename, void* userdata) {
     // Early exit if it's already loaded.
     HCUSTOMMODULE handle_out = plugin_get_module_handle(filename);
     if (handle_out != NULL) {
+        // Already loaded as a plugin
         return handle_out;
+    }
+
+    HMODULE native_handle = GetModuleHandleA(filename);
+    if (native_handle != INVALID_HANDLE_VALUE && native_handle != NULL) {
+        // Already loaded normally by Windows
+        return (HCUSTOMMODULE)native_handle;
     }
 
     sprintf(vpath, "/plugins/%s", filename);
     if (PHYSFS_exists(vpath)) {
         handle_out = vfs_load_dll(vpath);
-    } else {
+    }
+    if (handle_out == NULL) {
         handle_out = LoadLibraryA(filename);
     }
-    return handle_out;
-}
 
-FARPROC custom_get_proc_address(HCUSTOMMODULE module, const char* name, void* userdata) {
-    FARPROC addr = GetProcAddress(module, name);
-    if (addr == NULL) {
-        addr = MemoryGetProcAddress(module, name);
+    if (handle_out == NULL) {
+        printf("%s: Unable to load DLL '%s'.\n", loader_err, filename);
     }
-    return addr;
+    return handle_out;
 }
 
 // We use this to pair the filename with a handle, to implement plugin_get_module_handle().
@@ -71,6 +75,15 @@ void* plugin_get_module_handle(const char* filename) {
 
 void* plugin_get_proc_address(void* handle, const char* function_name) {
     return MemoryGetProcAddress(handle, function_name);
+}
+
+
+FARPROC custom_get_proc_address(HCUSTOMMODULE module, const char* name, void* userdata) {
+    FARPROC addr = MemoryGetProcAddress(module, name);
+    if (addr == NULL) {
+        addr = GetProcAddress(module, name);
+    }
+    return addr;
 }
 
 void plugin_cleanup(void* plugin_handle) {
