@@ -104,7 +104,7 @@ void plugin_cleanup(void* plugin_handle) {
 void* vfs_load_dll(const char* filename) {
     void* handle_out = plugin_get_module_handle(filename);
 
-    printf("%s: Loading %s...\n", loader_msg, filename);
+    printf("%s: Loading '%s'...\n", loader_msg, filename);
     // It's already loaded in the list. Return NULL handle so caller knows something went wrong.
     if (handle_out != NULL) {
         printf("%s: %s is already loaded.\n", loader_warn, filename);
@@ -132,7 +132,12 @@ void* vfs_load_dll(const char* filename) {
 
         // Load the library, using our custom LoadLibrary and GetProcAddress code to resolve imports.
         handle_out = MemoryLoadLibraryEx(plugin_data, filesize, MemoryDefaultAlloc, MemoryDefaultFree, custom_load_library,
-                                         custom_get_proc_address, MemoryDefaultFreeLibrary, NULL);
+                                         MemoryDefaultGetProcAddress, MemoryDefaultFreeLibrary, NULL);
+        if (handle_out == NULL) {
+            printf("%s: Failed to load '%s'\n", loader_err, filename);
+        } else {
+            printf("%s: Finished loading '%s'\n", loader_msg, vpath);
+        }
 
         // MemoryModule automatically calls the DLL/EXE entry point.
     }
