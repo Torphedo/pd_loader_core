@@ -46,6 +46,8 @@ HCUSTOMMODULE custom_load_library(const char* filename, void* userdata) {
 
     if (handle_out == NULL) {
         printf("%s: Unable to load DLL '%s'.\n", loader_err, filename);
+    } else {
+        printf("%s: Loaded dependency DLL '%s'.\n", loader_msg, filename);
     }
     return handle_out;
 }
